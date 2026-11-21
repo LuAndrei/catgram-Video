@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CatGram - Gato Dev</title>
+  <style>
+    :root {
+      --bg-cream: #f7efe2;
+      --card-bg: #fffaf2;
+      --wood-dark: #5c3d2e;
+      --wood-mid: #8c5e45;
+      --accent-orange: #e07a3f;
+      --accent-green: #6b9e78;
+      --heart-red: #e64848;
+      --border-soft: #d9c5ab;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+  background: #f5ead6;
+  color: #4a2e1b;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100%;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.app-frame {
+  width: 100%;
+  max-width: 390px;
+  min-height: 520px;
+  height: auto;
+  background: #fffaf0;
+  border: 3px solid #4a2e1b;
+  border-radius: 20px;
+  box-shadow: 0 6px 0 #4a2e1b;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+    .app-window {
+      width: 100%;
+      max-width: 400px;
+      height: 620px;
+      background: var(--card-bg);
+      border: 3px solid var(--wood-dark);
+      border-radius: 18px;
+      box-shadow: 0 8px 0 rgba(92, 61, 46, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Barra superior estilo CatOS */
+    .top-bar {
+      background: var(--wood-dark);
+      color: #fffaf2;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .badge-acorns {
+      background: var(--wood-mid);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    /* Vistas */
+    .view {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      padding: 14px;
+      overflow-y: auto;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    /* Vista 1: Subir Reel */
+    .upload-header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .upload-header h2 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .upload-header p {
+      font-size: 12px;
+      color: var(--wood-mid);
+    }
+
+    .preview-box {
+      background: #2b211c;
+      border: 2px solid var(--wood-dark);
+      border-radius: 12px;
+      height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .preview-box video {
+      height: 100%;
+      width: auto;
+      object-fit: cover;
+    }
+
+    .tag-label {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(92, 61, 46, 0.85);
+      color: #fff;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 2px solid var(--border-soft);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--wood-dark);
+      font-size: 13px;
+      margin-bottom: 10px;
+      resize: none;
+    }
+
+    .tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .tag-chip {
+      background: var(--bg-cream);
+      border: 1.5px solid var(--wood-mid);
+      color: var(--wood-dark);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .tag-chip.selected {
+      background: var(--accent-orange);
+      color: #fff;
+      border-color: var(--accent-orange);
+    }
+
+    .btn-primary {
+      background: var(--accent-green);
+      color: #fff;
+      border: 2px solid var(--wood-dark);
+      border-radius: 12px;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 0 var(--wood-dark);
+      transition: transform 0.1s;
+      margin-top: auto;
+    }
+
+    .btn-primary:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--wood-dark);
+    }
+
+    /* Vista 2: Reel publicado y Likes */
+    .reel-container {
+      position: relative;
+      background: #1e1714;
+      border: 2px solid var(--wood-dark);
+      border-radius: 14px;
+      height: 310px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .reel-container video {
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .reel-overlay-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 60px;
+      padding: 10px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.78));
+      color: #fff;
+      font-size: 12px;
+    }
+
+    .reel-author {
+      font-weight: bold;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .reel-actions {
+      position: absolute;
+      right: 8px;
+      bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: rgba(255, 250, 242, 0.92);
+      border: 2px solid var(--wood-dark);
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.12s;
+    }
+
+    .action-btn:active {
+      transform: scale(1.2);
+    }
+
+    .stat-count {
+      color: #fff;
+      font-size: 11px;
+      font-weight: bold;
+      text-shadow: 0 1px 3px #000;
+      margin-top: -6px;
+    }
+
+    .comments-box {
+      flex: 1;
+      background: var(--bg-cream);
+      border: 2px solid var(--border-soft);
+      border-radius: 10px;
+      padding: 8px;
+      overflow-y: auto;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .comment-item {
+      margin-bottom: 6px;
+      line-height: 1.3;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .comment-item strong {
+      color: var(--wood-dark);
+    }
+
+    .comment-input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .comment-input-row input {
+      margin-bottom: 0;
+      flex: 1;
+    }
+
+    .btn-small {
+      background: var(--accent-orange);
+      color: #fff;
+      border: 2px solid var(--wood-dark);
+      border-radius: 10px;
+      padding: 0 12px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1.5px solid #fffaf2;
+      color: #fffaf2;
+      border-radius: 8px;
+      padding: 2px 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-window">
+    <div class="top-bar">
+      <span>🐾 CatGram • CatOS</span>
+      <span class="badge-acorns" id="acornCounter">🌰 +0 bellotas</span>
+    </div>
+
+    <!-- VISTA 1: SUBIR VIDEO -->
+    <div class="view active" id="uploadView">
+      <div class="upload-header">
+        <h2>Nuevo Reel de Oficina</h2>
+        <p>Comparte tu jornada en Night Cat Productions</p>
+      </div>
+
+      <div class="preview-box">
+        <span class="tag-label">🎬 video_1.mp4</span>
+        <video src="video_1.mp4" muted loop autoplay playsinline></video>
+      </div>
+
+      <label for="captionInput">Descripción del Reel:</label>
+      <textarea id="captionInput" rows="2">Un día normal en la oficina: mucho café, código y siesta merecida ☕💻🐱</textarea>
+
+      <label>Etiquetas (toca para elegir):</label>
+      <div class="tags-row" id="tagsRow">
+        <span class="tag-chip selected" onclick="toggleTag(this)">#GatoDev</span>
+        <span class="tag-chip selected" onclick="toggleTag(this)">#CatOS</span>
+        <span class="tag-chip" onclick="toggleTag(this)">#Ciberseguridad</span>
+        <span class="tag-chip" onclick="toggleTag(this)">#ModoSiesta</span>
+      </div>
+
+      <button class="btn-primary" onclick="publishReel()">🚀 Publicar Reel en CatGram</button>
+    </div>
+
+    <!-- VISTA 2: VER REEL Y LIKES -->
+    <div class="view" id="feedView">
+      <div class="reel-container">
+        <video id="liveVideo" src="video_1.mp4" loop playsinline></video>
+
+        <div class="reel-overlay-info">
+          <div class="reel-author">🐱 @GatoDev <span style="font-weight:normal; opacity:0.8;">• Ahora</span></div>
+          <div id="publishedCaption"></div>
+        </div>
+
+        <div class="reel-actions">
+          <button class="action-btn" onclick="addManualLike()" title="Dar Me Gusta">❤️</button>
+          <span class="stat-count" id="likeCount">1</span>
+
+          <button class="action-btn" onclick="toggleSound()" id="soundBtn" title="Silenciar/Activar sonido">🔇</button>
+          <span class="stat-count" id="viewCount">12 vistas</span>
+        </div>
+      </div>
+
+      <div class="comments-box" id="commentsBox">
+        <div class="comment-item"><strong>🐾 Sistema CatGram:</strong> ¡Tu Reel ya está en vivo!</div>
+      </div>
+
+      <div class="comment-input-row">
+        <input type="text" id="newCommentInput" placeholder="Responder como @GatoDev..." onkeydown="if(event.key==='Enter') postComment()" />
+        <button class="btn-small" onclick="postComment()">Enviar</button>
+        <button class="btn-small" style="background: var(--wood-mid);" onclick="backToEdit()">↺</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let likes = 1;
+    let views = 12;
+    let acorns = 0;
+    let likeInterval = null;
+    let commentInterval = null;
+
+    const npcComments = [
+      { user: "🐰 @ConejaDev", text: "¡Jajaja ese café de las 9 AM te salvó la vida!" },
+      { user: "🦁 @JefeLeon", text: "Buen ritmo, Gato Dev. ¡Pero que no se te enfríe el teclado!" },
+      { user: "☕ @CafeteriaCat", text: "Tu taza favorita ya está lista para mañana 🤎" },
+      { user: "💻 @SecOpsCat", text: "10/10 en ciberseguridad y 11/10 en esa corbata." },
+      { user: "🐱 @MichiJunior", text: "El final durmiendo con el michi blanco es lo mejor 😭❤️" }
+    ];
+
+    function toggleTag(el) {
+      el.classList.toggle("selected");
+    }
+
+    function publishReel() {
+      const caption = document.getElementById("captionInput").value.trim();
+      const selectedTags = Array.from(document.querySelectorAll(".tag-chip.selected"))
+        .map(t => t.textContent)
+        .join(" ");
+
+      document.getElementById("publishedCaption").textContent = `${caption} ${selectedTags}`;
+
+      document.getElementById("uploadView").classList.remove("active");
+      document.getElementById("feedView").classList.add("active");
+
+      const vid = document.getElementById("liveVideo");
+      vid.currentTime = 0;
+      vid.muted = false;
+      vid.play().then(() => {
+        document.getElementById("soundBtn").textContent = "🔊";
+      }).catch(() => {
+        vid.muted = true;
+        vid.play();
+        document.getElementById("soundBtn").textContent = "🔇";
+      });
+
+      startEngagementSimulation();
+    }
+
+    function startEngagementSimulation() {
+      clearInterval(likeInterval);
+      clearInterval(commentInterval);
+
+      let commentIndex = 0;
+
+      likeInterval = setInterval(() => {
+        const newLikes = Math.floor(Math.random() * 4) + 1;
+        likes += newLikes;
+        views += Math.floor(Math.random() * 15) + 5;
+        acorns = Math.floor(likes / 5);
+
+        updateCounters();
+      }, 1500);
+
+      commentInterval = setInterval(() => {
+        if (commentIndex < npcComments.length) {
+          const item = npcComments[commentIndex];
+          appendComment(item.user, item.text);
+          commentIndex++;
+        } else {
+          clearInterval(commentInterval);
+        }
+      }, 2800);
+    }
+
+    function updateCounters() {
+      document.getElementById("likeCount").textContent = likes;
+      document.getElementById("viewCount").textContent = `${views} vistas`;
+      document.getElementById("acornCounter").textContent = `🌰 +${acorns} bellotas`;
+    }
+
+    function addManualLike() {
+      likes += 1;
+      acorns = Math.floor(likes / 5);
+      updateCounters();
+    }
+
+    function toggleSound() {
+      const vid = document.getElementById("liveVideo");
+      vid.muted = !vid.muted;
+      document.getElementById("soundBtn").textContent = vid.muted ? "🔇" : "🔊";
+    }
+
+    function appendComment(user, text) {
+      const box = document.getElementById("commentsBox");
+      const div = document.createElement("div");
+      div.className = "comment-item";
+      div.innerHTML = `<strong>${user}:</strong> ${text}`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function postComment() {
+      const input = document.getElementById("newCommentInput");
+      const text = input.value.trim();
+      if (!text) return;
+      appendComment("🐱 @GatoDev", text);
+      input.value = "";
+    }
+
+    function backToEdit() {
+      clearInterval(likeInterval);
+      clearInterval(commentInterval);
+      document.getElementById("liveVideo").pause();
+      document.getElementById("feedView").classList.remove("active");
+      document.getElementById("uploadView").classList.add("active");
+    }
+  </script>
+</body>
+</html>
